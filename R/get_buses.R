@@ -14,14 +14,16 @@
 
 get_buses <- function(lon = 24.77770,
                       lat = 60.17746,
-                      time = as.POSIXct("2016-12-07 15:00",
-                                        format="%Y-%m-%d %H:%M")) {
+                      #time = as.POSIXct("2016-12-07 15:00",
+                      #                  format="%Y-%m-%d %H:%M")) {
+                      time = as.integer(Sys.time())){
 
-
+  time = as.POSIXct(time,origin = "1970-01-01" )
   closest_stops <- get_closest_stops(lon,lat)
 
   depts <- get_next_depts(closest_stops$stationIndex[1], time)
   depts <- select(depts, stationIndex, line, dateArrival)
   depts$dateArrival <- as.integer(depts$dateArrival)
-  return(jsonlite::toJSON(depts))
+  #return(jsonlite::toJSON(depts))
+  return(depts)
 }

@@ -17,5 +17,6 @@ score_articles <- function(in_uid, uuids_to_score){
     score = tag_score(in_uid, tags)
     uuid_scores = rbind(uuid_scores, data.frame(uuid = uuid, score = score))
   }
-  return(jsonlite::toJSON(uuid_scores))
+  #return(jsonlite::toJSON(uuid_scores))
+  return(uuid_scores)
 }
