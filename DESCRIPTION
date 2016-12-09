@@ -1,0 +1,13 @@
+Package: HblSwipeData
+Type: Package
+Title: Package containing R functions for HBL Commute Traffic Data
+Version: 0.1.0
+Author: Lotta Holm, Olli-Pekka Huovilainen, Liina Korhonen, Sami Kallinen
+Maintainer: Lotta Holm <lotta.holm@ksfmedia.fi>
+Description: Functions for serving the HBL Commute app with waiting times for
+    next busses.
+License: GPL-3
+Depends: dplyr
+Imports: gmt
+LazyData: TRUE
+RoxygenNote: 5.0.1
