@@ -144,3 +144,60 @@ get_next_depts <- function(stId = 2214206, time, n=50) {
 }
 
 
+# ## Returns score for given user id and list of tags
+#
+
+tag_score <- function(uid, tags){
+  # tags <- strsplit(tags, ",")[[1]] # Split string from ,
+  score <- filter(swipes, tag %in% tags) %>%
+    mutate(tag_score = (pos+1)/(pos+neg+2)) %>%
+    summarise(score = mean(tag_score)) %>%
+    unlist()
+  if (is.nan(score))
+    score <- 0.5
+  return(score)
+}
+
+
+
+# ## Update given swipe information
+#
+
+add_swipe <- function(in_uid, uuid, in_pos = 0, in_neg = 0){
+  # Read tags from xlibris based on given uuid
+  tags <- unlist(get_article_by_uuid(uuid))
+  # Take subset of swipes which includes only given user and tags from given article
+  sw <- filter(swipes, uid == in_uid, tag %in% tags)
+
+  # Increment counts for existing tags
+  swipes <- swipes %>% mutate(update_row = ((uid == in_uid) & (tag %in% tags)),  #determine which rows counts are updated
+                              pos = ifelse(update_row, pos+in_pos, pos),
+                              neg = ifelse(update_row, neg+in_neg, neg)) %>%
+    select(-update_row)  #remove unnecessary temporary column
+
+  # Add rows for new tags for this user
+  tags_to_add <- setdiff(tags, sw$tag)  # What tags are not included in sw$tag
+  swipes <- rbind(swipes, data.frame(uid = rep(in_uid, length(tags_to_add)),
+                                     tag = tags_to_add,
+                                     pos = rep(in_pos, length(tags_to_add)),
+                                     neg = rep(in_neg, length(tags_to_add))))
+  # Update global variable
+  swipes <<- swipes
+}
+
+
+# ## Get article tags based on uuid from xlibris
+#
+
+get_article_by_uuid <- function(uuid, column_selection = c("Tags")){
+  url_string <- "http://" %+% xlibris_user %+% ":" %+% xlibris_secret %+% "@" %+%
+    xlibris_url %+% "/opencontent/search?q=uuid:" %+% uuid
+
+  data <- jsonlite::fromJSON(URLencode(url_string))
+  data <- do.call(dplyr::bind_rows,lapply(data$hits$hits$versions,
+                                          function(x) x[[2]]))
+  data <- data %>% dplyr::select_(.dots = column_selection)
+  return(data)
+}
+
+
